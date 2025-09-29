@@ -48,15 +48,13 @@ class ZohoCrmService
             $this->refreshToken = $integration->refresh_token;
             $this->expiresIn = $integration->expires_in;
         } else {
-            $this->accessToken = NULL;
-            $this->refreshToken = NULL;
-            $this->expiresIn = NULL;
+            $this->refreshAccessToken();
         }
-    }
+    }   
 
     public function generateAuthUrl()
     {
-        return 'https://accounts.zoho.eu/oauth/v2/auth?response_type=code&client_id=' . $this->clientId . '&redirect_uri=' . $this->redirectUri . '&scope=' . $this->scope;
+        return 'https://accounts.zoho.eu/oauth/v2/auth?response_type=code&client_id=' . $this->clientId . '&access_type=offline&redirect_uri=' . $this->redirectUri . '&scope=' . $this->scope;
     }
 
     /**
@@ -64,14 +62,6 @@ class ZohoCrmService
      */
     public function getTokenData($code = null)
     {
-        $postData = [
-            'grant_type' => 'authorization_code',
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'redirect_uri' => $this->redirectUri,
-            'code' => $code
-        ];
-
         $response = Http::asForm()->post('https://accounts.zoho.eu/oauth/v2/token', [
             'grant_type' => 'authorization_code',
             'client_id' => $this->clientId,
@@ -82,7 +72,7 @@ class ZohoCrmService
 
         if ($response->successful()) {
             $data = $response->json();
-
+            
             $this->accessToken = $data['access_token'];
             return $data;
         }
@@ -106,6 +96,7 @@ class ZohoCrmService
 
             if ($response->successful()) {
                 $data = $response->json();
+                
                 $this->accessToken = $data['access_token'];
 
                 $integration = ZohoIntegration::getActive();

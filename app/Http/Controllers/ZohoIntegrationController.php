@@ -70,4 +70,13 @@ class ZohoIntegrationController extends Controller
             'isActive' => $integration && !$integration->isTokenExpired()
         ]);
     }
+
+    public function refreshTokens(Request $request)
+    {
+        $this->zohoService->refreshAccessToken();
+
+        return response()->json([
+            'success' => 'Tokens refreshed successfully',
+        ], 200);
+    }
 }

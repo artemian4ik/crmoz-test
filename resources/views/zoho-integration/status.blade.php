@@ -154,17 +154,30 @@
         @endif
 
         <div style="text-align: center;">
-            @if($integration && !$integration->isTokenExpired())
-                <form method="POST" action="{{ route('zoho.integration.refresh') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-warning">Оновити токени</button>
-                </form>
+            @if($isActive)
+                <button type="submit" onclick="refreshTokens()" class="btn btn-warning">Оновити токени</button>
             @else
                 <a href="{{ route('zoho.integration.index') }}" class="btn btn-success">
                     {{ $integration ? 'Переналаштувати інтеграцію' : 'Налаштувати інтеграцію' }}
                 </a>
+                <button onclick="refreshTokens()" class="btn btn-warning">
+                    Refresh tokens
+                </button>
             @endif
         </div>
     </div>
 </body>
 </html>
+
+<script>
+    function refreshTokens() {
+        fetch('{{ route('zoho.integration.refresh') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        }).then(response => response.json()).then(data => {
+            location.reload();
+        });
+    }
+</script>
